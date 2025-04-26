@@ -1,17 +1,18 @@
 const container = document.getElementById('array-container');
 let array = [];
-let threadColorMap = {};  // Maps index to thread
+let threadColorMap = {}; // Maps index to a thread
+let isSorting = false;
 
 // 8 different thread colors
 const threadColors = [
     '#ff0000', // Red
-    '#ffa500', // Orange
     '#ffff00', // Yellow
-    '#008000', // Green
-    '#00ffff', // Cyan
-    '#0000ff', // Blue
-    '#800080', // Purple
-    '#ff00ff'  // Magenta
+    '#ffffff', // White
+    '#660000', // Dark Red
+    '#cccccc', // Light Grey
+    '#999999', // Dark Grey
+    '#ff6666', // Light Red
+    '#ffd700'  // Gold-ish Yellow
 ];
 
 function generateArray(size = 30) {
@@ -19,7 +20,7 @@ function generateArray(size = 30) {
     threadColorMap = {};
     for (let i = 0; i < size; i++) {
         array.push(Math.floor(Math.random() * 300) + 20);
-        threadColorMap[i] = -1; // No thread yet
+        threadColorMap[i] = -1; // Initially no thread
     }
     renderArray();
 }
@@ -34,13 +35,13 @@ function renderArray(highlight = []) {
 
         const thread = threadColorMap[index];
         if (highlight.includes(index)) {
-            bar.style.backgroundColor = '#ffff00'; // Yellow highlight
-            bar.style.color = '#e60000';           // Red text
+            bar.style.backgroundColor = '#ffff00'; // Highlight yellow
+            bar.style.color = '#e60000';           // Text red
         } else if (thread !== -1) {
             bar.style.backgroundColor = threadColors[thread % threadColors.length];
-            bar.style.color = '#000000'; // Black text on thread colors
+            bar.style.color = '#000000'; // Black text for thread groups
         } else {
-            bar.style.backgroundColor = '#e60000'; // Default unsorted color
+            bar.style.backgroundColor = '#e60000'; // Default
             bar.style.color = '#ffff00';           // Yellow text
         }
 
@@ -51,17 +52,22 @@ function renderArray(highlight = []) {
     });
 }
 
-async function startSequential() {
+function startSequential() {
+    if (isSorting) return;
     const size = parseInt(document.getElementById('array-size').value);
     if (!size || size < 5 || size > 100) {
         alert('Please enter array size between 5 and 100.');
         return;
     }
     generateArray(size);
-    await sequentialMergeSort(0, array.length - 1);
+    isSorting = true;
+    sequentialMergeSort(0, array.length - 1, function() {
+        isSorting = false;
+    });
 }
 
-async function startParallel() {
+function startParallel() {
+    if (isSorting) return;
     const size = parseInt(document.getElementById('array-size').value);
     if (!size || size < 5 || size > 100) {
         alert('Please enter array size between 5 and 100.');
@@ -69,71 +75,99 @@ async function startParallel() {
     }
     generateArray(size);
     const threads = parseInt(document.getElementById('threads').value);
-    await parallelMergeSort(0, array.length - 1, threads, 0);
+    isSorting = true;
+    parallelMergeSort(0, array.length - 1, threads, 0, function() {
+        isSorting = false;
+    });
 }
 
-async function sequentialMergeSort(start, end) {
-    if (start >= end) return;
-    const mid = Math.floor((start + end) / 2);
-    await sequentialMergeSort(start, mid);
-    await sequentialMergeSort(mid + 1, end);
-    await merge(start, mid, end);
-}
-
-async function parallelMergeSort(start, end, threads, threadID) {
-    if (start >= end) return;
+function sequentialMergeSort(start, end, callback) {
+    if (start >= end) {
+        if (callback) callback();
+        return;
+    }
 
     const mid = Math.floor((start + end) / 2);
 
-    // Assign thread color
+    sequentialMergeSort(start, mid, function() {
+        sequentialMergeSort(mid + 1, end, function() {
+            merge(start, mid, end, callback);
+        });
+    });
+}
+
+function parallelMergeSort(start, end, threads, threadID, callback) {
+    if (start >= end) {
+        if (callback) callback();
+        return;
+    }
+
+    const mid = Math.floor((start + end) / 2);
+
     for (let i = start; i <= end; i++) {
         threadColorMap[i] = threadID;
     }
     renderArray();
-    await sleep(400); // Show split
 
-    if (threads > 1) {
-        await Promise.all([
-            parallelMergeSort(start, mid, threads / 2, threadID * 2),
-            parallelMergeSort(mid + 1, end, threads / 2, threadID * 2 + 1)
-        ]);
-    } else {
-        await sequentialMergeSort(start, mid);
-        await sequentialMergeSort(mid + 1, end);
-    }
-
-    await merge(start, mid, end);
-
-    // After merge, unify color back to default
-    for (let i = start; i <= end; i++) {
-        threadColorMap[i] = -1;
-    }
-    renderArray();
+    setTimeout(function() {
+        if (threads > 1) {
+            let finished = 0;
+            parallelMergeSort(start, mid, threads / 2, threadID * 2, function() {
+                finished++;
+                if (finished === 2) merge(start, mid, end, callback);
+            });
+            parallelMergeSort(mid + 1, end, threads / 2, threadID * 2 + 1, function() {
+                finished++;
+                if (finished === 2) merge(start, mid, end, callback);
+            });
+        } else {
+            sequentialMergeSort(start, mid, function() {
+                sequentialMergeSort(mid + 1, end, function() {
+                    merge(start, mid, end, callback);
+                });
+            });
+        }
+    }, 400); // Delay to show splitting
 }
 
-async function merge(start, mid, end) {
+function merge(start, mid, end, callback) {
     let temp = [];
     let i = start, j = mid + 1;
+    let k = start;
 
-    while (i <= mid && j <= end) {
-        if (array[i] < array[j]) {
+    function stepMerge() {
+        if (i <= mid && j <= end) {
+            if (array[i] < array[j]) {
+                temp.push(array[i++]);
+            } else {
+                temp.push(array[j++]);
+            }
+            setTimeout(stepMerge, 30);
+        } else if (i <= mid) {
             temp.push(array[i++]);
-        } else {
+            setTimeout(stepMerge, 30);
+        } else if (j <= end) {
             temp.push(array[j++]);
+            setTimeout(stepMerge, 30);
+        } else {
+            // Finished collecting into temp
+            let idx = 0;
+            function placeBack() {
+                if (k <= end) {
+                    array[k] = temp[idx++];
+                    threadColorMap[k] = -1; // Reset thread color after merging
+                    renderArray([k]);
+                    k++;
+                    setTimeout(placeBack, 30);
+                } else {
+                    if (callback) callback();
+                }
+            }
+            placeBack();
         }
     }
-    while (i <= mid) temp.push(array[i++]);
-    while (j <= end) temp.push(array[j++]);
-
-    for (let k = start; k <= end; k++) {
-        array[k] = temp[k - start];
-        renderArray([k]);
-        await sleep(30);
-    }
+    stepMerge();
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-generateArray(30); // Default array size on load
+// Initial load
+generateArray(30);
