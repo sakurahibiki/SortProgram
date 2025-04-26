@@ -6,13 +6,13 @@ let isSorting = false;
 // 8 different thread colors
 const threadColors = [
     '#ff0000', // Red
+    '#ffa500', // Orange
     '#ffff00', // Yellow
-    '#ffffff', // White
-    '#660000', // Dark Red
-    '#cccccc', // Light Grey
-    '#999999', // Dark Grey
-    '#ff6666', // Light Red
-    '#ffd700'  // Gold-ish Yellow
+    '#008000', // Green
+    '#00ffff', // Cyan
+    '#0000ff', // Blue
+    '#800080', // Purple
+    '#ff00ff'  // Magenta
 ];
 
 function generateArray(size = 30) {
