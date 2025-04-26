@@ -1,26 +1,36 @@
 const container = document.getElementById('array-container');
 let array = [];
-let threadColorMap = {}; // Maps index to a thread
+let threadColorMap = {}; 
 let isSorting = false;
+let progressBars = {}; 
+let speed = 60;
 
-// 8 different thread colors
+// Color palette for threads
 const threadColors = [
     '#ff0000', // Red
-    '#ffa500', // Orange
     '#ffff00', // Yellow
-    '#008000', // Green
-    '#00ffff', // Cyan
-    '#0000ff', // Blue
-    '#800080', // Purple
-    '#ff00ff'  // Magenta
+    '#ffffff', // White
+    '#660000', // Dark Red
+    '#cccccc', // Light Grey
+    '#999999', // Dark Grey
+    '#ff6666', // Light Red
+    '#ffd700'  // Gold-ish Yellow
 ];
+
+document.getElementById('speed-slider').addEventListener('input', function() {
+  const min = parseInt(this.min);
+  const max = parseInt(this.max);
+  
+    speed = parseInt(this.value);
+    inverted = (max - speed) + min;
+});
 
 function generateArray(size = 30) {
     array = [];
     threadColorMap = {};
     for (let i = 0; i < size; i++) {
         array.push(Math.floor(Math.random() * 300) + 20);
-        threadColorMap[i] = -1; // Initially no thread
+        threadColorMap[i] = -1;
     }
     renderArray();
 }
@@ -35,14 +45,14 @@ function renderArray(highlight = []) {
 
         const thread = threadColorMap[index];
         if (highlight.includes(index)) {
-            bar.style.backgroundColor = '#ffff00'; // Highlight yellow
-            bar.style.color = '#e60000';           // Text red
+            bar.style.backgroundColor = '#ffff00';
+            bar.style.color = '#000000';
         } else if (thread !== -1) {
             bar.style.backgroundColor = threadColors[thread % threadColors.length];
-            bar.style.color = '#000000'; // Black text for thread groups
+            bar.style.color = '#000000';
         } else {
-            bar.style.backgroundColor = '#e60000'; // Default
-            bar.style.color = '#ffff00';           // Yellow text
+            bar.style.backgroundColor = '#ff0000';
+            bar.style.color = '#ffff00';
         }
 
         const numberLabel = document.createElement('span');
@@ -50,6 +60,38 @@ function renderArray(highlight = []) {
         bar.appendChild(numberLabel);
         container.appendChild(bar);
     });
+}
+
+function createProgressBars(numThreads) {
+    const container = document.getElementById('progress-container');
+    container.innerHTML = '';
+
+    for (let i = 0; i < numThreads; i++) {
+        const box = document.createElement('div');
+        box.classList.add('progress-thread');
+
+        const label = document.createElement('h4');
+        label.innerText = `Thread ${i + 1}`;
+
+        const bar = document.createElement('div');
+        bar.classList.add('progress-bar');
+
+        const fill = document.createElement('div');
+        fill.classList.add('progress-fill');
+        bar.appendChild(fill);
+
+        box.appendChild(label);
+        box.appendChild(bar);
+        container.appendChild(box);
+
+        progressBars[i] = fill;
+    }
+}
+
+function updateProgress(threadID, percent) {
+    if (progressBars[threadID]) {
+        progressBars[threadID].style.width = `${percent}%`;
+    }
 }
 
 function startSequential() {
@@ -75,6 +117,7 @@ function startParallel() {
     }
     generateArray(size);
     const threads = parseInt(document.getElementById('threads').value);
+    createProgressBars(threads);
     isSorting = true;
     parallelMergeSort(0, array.length - 1, threads, 0, function() {
         isSorting = false;
@@ -109,6 +152,9 @@ function parallelMergeSort(start, end, threads, threadID, callback) {
     }
     renderArray();
 
+    const total = end - start + 1;
+    updateProgress(threadID, Math.min(100, (total / array.length) * 100));
+
     setTimeout(function() {
         if (threads > 1) {
             let finished = 0;
@@ -127,7 +173,7 @@ function parallelMergeSort(start, end, threads, threadID, callback) {
                 });
             });
         }
-    }, 400); // Delay to show splitting
+    }, speed * 2);
 }
 
 function merge(start, mid, end, callback) {
@@ -142,23 +188,22 @@ function merge(start, mid, end, callback) {
             } else {
                 temp.push(array[j++]);
             }
-            setTimeout(stepMerge, 30);
+            setTimeout(stepMerge, speed);
         } else if (i <= mid) {
             temp.push(array[i++]);
-            setTimeout(stepMerge, 30);
+            setTimeout(stepMerge, speed);
         } else if (j <= end) {
             temp.push(array[j++]);
-            setTimeout(stepMerge, 30);
+            setTimeout(stepMerge, speed);
         } else {
-            // Finished collecting into temp
             let idx = 0;
             function placeBack() {
                 if (k <= end) {
                     array[k] = temp[idx++];
-                    threadColorMap[k] = -1; // Reset thread color after merging
+                    threadColorMap[k] = -1;
                     renderArray([k]);
                     k++;
-                    setTimeout(placeBack, 30);
+                    setTimeout(placeBack, speed);
                 } else {
                     if (callback) callback();
                 }
@@ -169,5 +214,5 @@ function merge(start, mid, end, callback) {
     stepMerge();
 }
 
-// Initial load
+// Initial setup
 generateArray(30);

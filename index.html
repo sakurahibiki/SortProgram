@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Parallel Merge Sort Visualization</title>
-    <link rel="stylesheet" href="style.css">
-</head>
 <body>
     <h1>Parallel Merge Sort Visualization</h1>
+
+    <div id="description">
+        <p><strong>How Parallel Merge Sort Works:</strong></p>
+        <p>The array is divided into sections, each section is assigned to a different thread (colored differently). Sections are sorted separately, then merged together to form a fully sorted array.</p>
+    </div>
+
     <div id="controls">
         <input type="number" id="array-size" placeholder="Array Size (5-100)" min="5" max="100">
         <select id="threads">
@@ -14,11 +13,14 @@
             <option value="4">4 Threads</option>
             <option value="8">8 Threads</option>
         </select>
+        <label for="speed-slider">Speed:</label>
+        <input type="range" id="speed-slider" min="10" max="300" value="60">
         <button onclick="startSequential()">Start Sequential Sort</button>
         <button onclick="startParallel()">Start Parallel Sort</button>
     </div>
-    <div id="array-container"></div>
 
+    <div id="array-container"></div>
+    <div id="progress-container"></div>
     <div id="description">
         <h1>How Parallel Merge Sort Works 📄✏️</h1>
           <h3>Parallel Processing Approach</h2>
@@ -51,7 +53,6 @@
             <li>The animation completes when all bars are sorted and return to the primary theme colors (red/yellow).</li>
           </ul>
       </div>
-
     <script src="script.js"></script>
 </body>
 </html>

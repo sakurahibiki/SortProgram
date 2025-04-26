@@ -1,10 +1,22 @@
-
 body {
-    font-family: 'Helvetica', Times, serif;
-    background: #000000; /* Black */
-    color: #ffffff; /* White */
+    font-family: 'Times New Roman', Times, serif;
+    background: #000000;
+    color: #ffffff;
     text-align: center;
     padding: 20px;
+}
+
+#description {
+    text-align: left;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 #controls {
@@ -13,12 +25,13 @@ body {
 
 #array-container {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: flex-end;
     min-height: 300px;
     margin-top: 30px;
     gap: 2px;
+    position: relative;
 }
 
 .bar {
@@ -28,15 +41,59 @@ body {
     width: 20px;
     font-size: 12px;
     border-radius: 4px 4px 0 0;
-    background-color: #ff0000; /* Default bar red */
-    color: #ffff00; /* Default number yellow */
+    background-color: #ff0000;
+    color: #ffff00;
+    position: relative;
 }
 
 .bar span {
     margin-bottom: 3px;
 }
 
-button, select, input {
+#progress-container {
+    margin-top: 30px;
+    
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    display: none;
+}
+
+.progress-thread {
+    background-color: #1a1a1a;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    width: 150px;
+    text-align: center;
+    display: none;
+}
+
+.progress-thread h4 {
+    color: #ffff00;
+    margin-bottom: 5px;
+    font-size: 14px;
+    display: none;
+}
+
+.progress-bar {
+    background-color: #444;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    display: none;
+}
+
+.progress-fill {
+    height: 10px;
+    background-color: #ff0000;
+    width: 0%;
+    transition: width 0.3s;
+    display: none;
+}
+
+button, select, input[type=number] {
     padding: 10px;
     margin: 5px;
     font-size: 16px;
@@ -45,37 +102,46 @@ button, select, input {
 }
 
 button {
-    background-color: #ff0000; /* Red */
-    color: #ffffff; /* White */
+    background-color: #ff0000;
+    color: #ffffff;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #990000; /* Darker red */
+    background-color: #990000;
 }
 
-select, input {
-    background-color: #1a1a1a; /* Dark grey */
-    color: #ffff00; /* Yellow */
-    border: 1px solid #ffffff; /* White border */
+select, input[type=number] {
+    background-color: #1a1a1a;
+    color: #ffff00;
+    border: 1px solid #ffffff;
 }
 
-#description {
-    text-align: left;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 10px;
-    background-color: #1a1a1a; 
-    border: 2px solid #ff0000;
-    border-radius: 10px;
-    color: #ffffff;
-    font-size: 16px;
-    line-height: 1.6;
+input[type=range] {
+    width: 150px;
+    vertical-align: middle;
 }
 
+.glow {
+    box-shadow: 0 0 10px #ffff00;
+}
 
+#speed-slider{
+  direction:rtl;
+  -webkit-appearance: none;
+  background: transparent;  
+}
 li {
     display: list-item;
     list-style-type: "⇒";
     padding-inline-start: 1ch;
   }
+
+#speed-slider::-webkit-slider-runnable-track{
+  background: gray;
+  border-radius: 6px;
+}
+#speed-slider::-webkit-slider-thumb{
+  background: white;
+  cursor: pointer;
+}
