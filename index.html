@@ -1,152 +1,23 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Parallel Merge Sort Visualization</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-        }
-        #controls {
-            margin-bottom: 20px;
-        }
-        #array-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 300px;
-            margin-top: 30px;
-            gap: 2px;
-        }
-        .bar {
-            width: 20px;
-            background-color: #4caf50;
-        }
-        button, select {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #2196f3;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #1976d2;
-        }
-        select {
-            background-color: #333;
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Parallel Merge Sort Visualization</h1>
     <div id="controls">
-        <button onclick="startSequential()">Start Sequential Sort</button>
-        <button onclick="startParallel()">Start Parallel Sort</button>
+        <input type="number" id="array-size" placeholder="Array Size (5-100)" min="5" max="100">
         <select id="threads">
             <option value="2">2 Threads</option>
             <option value="4">4 Threads</option>
             <option value="8">8 Threads</option>
         </select>
+        <button onclick="startSequential()">Start Sequential Sort</button>
+        <button onclick="startParallel()">Start Parallel Sort</button>
     </div>
     <div id="array-container"></div>
 
-    <script>
-        const container = document.getElementById('array-container');
-        let array = [];
-
-        function generateArray(size = 30) {
-            array = [];
-            for (let i = 0; i < size; i++) {
-                array.push(Math.floor(Math.random() * 300) + 20);
-            }
-            renderArray();
-        }
-
-        function renderArray(highlight = []) {
-            container.innerHTML = '';
-            array.forEach((value, index) => {
-                const bar = document.createElement('div');
-                bar.classList.add('bar');
-                bar.style.height = value + 'px';
-                if (highlight.includes(index)) {
-                    bar.style.backgroundColor = '#f44336';
-                }
-                container.appendChild(bar);
-            });
-        }
-
-        async function startSequential() {
-            generateArray();
-            await sequentialMergeSort(0, array.length - 1);
-        }
-
-        async function startParallel() {
-            generateArray();
-            const threads = parseInt(document.getElementById('threads').value);
-            await parallelMergeSort(0, array.length - 1, threads);
-        }
-
-        async function sequentialMergeSort(start, end) {
-            if (start >= end) return;
-            const mid = Math.floor((start + end) / 2);
-            await sequentialMergeSort(start, mid);
-            await sequentialMergeSort(mid + 1, end);
-            await merge(start, mid, end);
-        }
-
-        async function parallelMergeSort(start, end, threads) {
-            if (start >= end) return;
-
-            const mid = Math.floor((start + end) / 2);
-
-            if (threads > 1) {
-                await Promise.all([
-                    parallelMergeSort(start, mid, threads / 2),
-                    parallelMergeSort(mid + 1, end, threads / 2)
-                ]);
-            } else {
-                await sequentialMergeSort(start, mid);
-                await sequentialMergeSort(mid + 1, end);
-            }
-            await merge(start, mid, end);
-        }
-
-        async function merge(start, mid, end) {
-            let temp = [];
-            let i = start, j = mid + 1;
-
-            while (i <= mid && j <= end) {
-                if (array[i] < array[j]) {
-                    temp.push(array[i++]);
-                } else {
-                    temp.push(array[j++]);
-                }
-            }
-            while (i <= mid) temp.push(array[i++]);
-            while (j <= end) temp.push(array[j++]);
-
-            for (let k = start; k <= end; k++) {
-                array[k] = temp[k - start];
-                renderArray([k]);
-                await sleep(30);
-            }
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        generateArray();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
