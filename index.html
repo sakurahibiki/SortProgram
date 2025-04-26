@@ -19,6 +19,39 @@
     </div>
     <div id="array-container"></div>
 
+    <div id="description">
+        <h1>How Parallel Merge Sort Works 📄✏️</h1>
+          <h3>Parallel Processing Approach</h2>
+          <ul>
+            <li>
+                Instead of recursively sorting and merging the entire array step-by-step like sequential merge sort, 
+                this algorithm splits the array into multiple smaller sections that can be sorted independently (in "parallel").
+            </li>
+            <li>
+                Different "threads" (simulated by different colors in this animation)
+                work on different sections of the array simultaneously.
+            </li>
+            <li>
+                As threads finish sorting their sections, they are merged together progressively until the entire array is sorted.
+            </li>
+          </ul>
+          <h3>Algorithm Steps:</h3>
+          <ul>
+            <li><strong>Divide:</strong> Recursively split the array into smaller subarrays.</li>
+            <li><strong>Assign Threads:</strong> Each split section is assigned a thread (color-coded).</li>
+            <li><strong>Sort Independently:</strong> Each thread sorts its assigned section separately.</li>
+            <li><strong>Merge Sections: </strong>After sorting, sections are merged back together in correct order.</li>
+            <li><strong>Unify: </strong> After sorting, sections are merged back together in correct order.</li>
+          </ul>
+          <h3>Visualization Guide:</h3>
+          <ul>
+            <li>Each color represents a different thread working on a different section of the array.</li>
+            <li>During splitting, bars grouped under the same thread share a color.</li>
+            <li>As merging happens, sorted sections combine and colors reset to unify the array.</li>
+            <li>The animation completes when all bars are sorted and return to the primary theme colors (red/yellow).</li>
+          </ul>
+      </div>
+
     <script src="script.js"></script>
 </body>
 </html>

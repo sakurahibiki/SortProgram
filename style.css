@@ -1,5 +1,6 @@
+
 body {
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Helvetica', Times, serif;
     background: #000000; /* Black */
     color: #ffffff; /* White */
     text-align: center;
@@ -58,3 +59,23 @@ select, input {
     color: #ffff00; /* Yellow */
     border: 1px solid #ffffff; /* White border */
 }
+
+#description {
+    text-align: left;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #1a1a1a; 
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+li {
+    display: list-item;
+    list-style-type: "⇒";
+    padding-inline-start: 1ch;
+  }
