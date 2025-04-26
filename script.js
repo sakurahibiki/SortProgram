@@ -1,26 +1,47 @@
 const container = document.getElementById('array-container');
 let array = [];
+let threadColorMap = {};  // Maps index to thread
+
+// 8 different thread colors
+const threadColors = [
+    '#ff0000', // Red
+    '#ffa500', // Orange
+    '#ffff00', // Yellow
+    '#008000', // Green
+    '#00ffff', // Cyan
+    '#0000ff', // Blue
+    '#800080', // Purple
+    '#ff00ff'  // Magenta
+];
 
 function generateArray(size = 30) {
     array = [];
+    threadColorMap = {};
     for (let i = 0; i < size; i++) {
         array.push(Math.floor(Math.random() * 300) + 20);
+        threadColorMap[i] = -1; // No thread yet
     }
     renderArray();
 }
 
-function renderArray(highlight = [], splitSections = []) {
+function renderArray(highlight = []) {
     container.innerHTML = '';
 
     array.forEach((value, index) => {
         const bar = document.createElement('div');
         bar.classList.add('bar');
         bar.style.height = value + 'px';
+
+        const thread = threadColorMap[index];
         if (highlight.includes(index)) {
-            bar.style.backgroundColor = '#ffff00'; // Highlighted in yellow
-            bar.style.color = '#e60000';           // Number in red when highlighted
-        } else if (splitSections.includes(index)) {
-            bar.style.backgroundColor = '#ff6600'; // Orange color during split sorting
+            bar.style.backgroundColor = '#ffff00'; // Yellow highlight
+            bar.style.color = '#e60000';           // Red text
+        } else if (thread !== -1) {
+            bar.style.backgroundColor = threadColors[thread % threadColors.length];
+            bar.style.color = '#000000'; // Black text on thread colors
+        } else {
+            bar.style.backgroundColor = '#e60000'; // Default unsorted color
+            bar.style.color = '#ffff00';           // Yellow text
         }
 
         const numberLabel = document.createElement('span');
@@ -48,7 +69,7 @@ async function startParallel() {
     }
     generateArray(size);
     const threads = parseInt(document.getElementById('threads').value);
-    await parallelMergeSort(0, array.length - 1, threads);
+    await parallelMergeSort(0, array.length - 1, threads, 0);
 }
 
 async function sequentialMergeSort(start, end) {
@@ -59,19 +80,22 @@ async function sequentialMergeSort(start, end) {
     await merge(start, mid, end);
 }
 
-async function parallelMergeSort(start, end, threads) {
+async function parallelMergeSort(start, end, threads, threadID) {
     if (start >= end) return;
 
     const mid = Math.floor((start + end) / 2);
 
-    renderArray([], Array.from({length: end - start + 1}, (_, i) => i + start)); // Highlight split
-
-    await sleep(200); // Pause to show division visually
+    // Assign thread color
+    for (let i = start; i <= end; i++) {
+        threadColorMap[i] = threadID;
+    }
+    renderArray();
+    await sleep(400); // Show split
 
     if (threads > 1) {
         await Promise.all([
-            parallelMergeSort(start, mid, threads / 2),
-            parallelMergeSort(mid + 1, end, threads / 2)
+            parallelMergeSort(start, mid, threads / 2, threadID * 2),
+            parallelMergeSort(mid + 1, end, threads / 2, threadID * 2 + 1)
         ]);
     } else {
         await sequentialMergeSort(start, mid);
@@ -79,6 +103,12 @@ async function parallelMergeSort(start, end, threads) {
     }
 
     await merge(start, mid, end);
+
+    // After merge, unify color back to default
+    for (let i = start; i <= end; i++) {
+        threadColorMap[i] = -1;
+    }
+    renderArray();
 }
 
 async function merge(start, mid, end) {
@@ -106,4 +136,4 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-generateArray(30); // Default array on load
+generateArray(30); // Default array size on load

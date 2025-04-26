@@ -24,9 +24,7 @@ body {
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
-    width: 25px;
-    background-color: #e60000;
-    color: #ffff00;
+    width: 20px;
     font-size: 12px;
     border-radius: 4px 4px 0 0;
 }
